@@ -7,6 +7,7 @@ from tkinter import messagebox, ttk
 
 from PIL import Image, ImageTk
 from pynput.keyboard import Key, KeyCode, Listener
+from pynput.mouse import Button, Controller
 from selenium import webdriver
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.chrome.options import Options
@@ -23,8 +24,11 @@ class AutoCookieClicker:
         self._clicking_big_cookie = False
         self._auto_upgrades = False
         self._auto_improvments = False
+        self._clicando = False
         self._driver = None
+        self.mouse = Controller()
 
+        # Iniciando Listener para capturar a tecla pressionada durante a execução da aplicação
         self._listener = Listener(self.toggle_key)
         self._listener.start()
 
@@ -82,6 +86,9 @@ class AutoCookieClicker:
             else:
                 self.lbl_auto_improvments.configure(text="Off", foreground="red")
             print(key, self._auto_improvments)
+        elif key == KeyCode(char="]"):
+            self._clicando = not self._clicando
+            print(key, self._clicando)
 
     def toggle_btn_click(self):
         if self._driver:
@@ -106,6 +113,12 @@ class AutoCookieClicker:
                 self.lbl_auto_improvments.configure(text="On", foreground="green")
             else:
                 self.lbl_auto_improvments.configure(text="Off", foreground="red")
+
+    def clicker(self):
+        while True:
+            if self._clicando:
+                self.mouse.click(Button.left, 1)
+            time.sleep(0.0001)
 
     def big_cookie_clicker(self):
         try:
@@ -155,6 +168,10 @@ class AutoCookieClicker:
         big_cookie_clicker_t.start()
         do_improvments_t = threading.Thread(target=self.do_improvments)
         do_improvments_t.start()
+
+    def run_auto_click_mouse(self):
+        clicker_t = threading.Thread(target=self.clicker)
+        clicker_t.start()
 
     def create_widgets(self):
         # Cria os frames
@@ -241,5 +258,6 @@ if __name__ == "__main__":
     janela = tk.Tk()
     auto_cookie = AutoCookieClicker(janela)
     auto_cookie.create_widgets()
+    auto_cookie.run_auto_click_mouse()
     janela.protocol("WM_DELETE_WINDOW", auto_cookie.on_closing)
     janela.mainloop()
