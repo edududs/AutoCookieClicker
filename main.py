@@ -62,8 +62,6 @@ class AutoCookieClicker:
         langage_button = self._driver.find_element(By.ID, "langSelect-PT-BR")
         langage_button.click()
 
-        self.run_threads()
-
     def toggle_key(self, key):
         if key == Key.f8:
             self._clicking_big_cookie = not self._clicking_big_cookie
@@ -113,65 +111,6 @@ class AutoCookieClicker:
                 self.lbl_auto_improvments.configure(text="On", foreground="green")
             else:
                 self.lbl_auto_improvments.configure(text="Off", foreground="red")
-
-    def clicker(self):
-        while True:
-            if self._clicando:
-                self.mouse.click(Button.left, 1)
-            time.sleep(0.0001)
-
-    def big_cookie_clicker(self):
-        try:
-            while True:
-                if self._clicking_big_cookie and self._driver:
-                    big_cookie = self._driver.find_element(By.ID, "bigCookie")
-                    big_cookie.click()
-        except StaleElementReferenceException:
-            pass
-
-    def do_upgrades(self):
-        try:
-            while True:
-                if self._auto_upgrades and self._driver:
-                    products = self._driver.find_elements(
-                        By.CSS_SELECTOR, "div.product.unlocked.enabled"
-                    )
-                    if products:
-                        try:
-                            products[-1].click()
-                        except:
-                            pass
-                time.sleep(0.5)
-        except StaleElementReferenceException:
-            pass
-
-    def do_improvments(self):
-        try:
-            while True:
-                if self._auto_improvments:
-                    improvments = self._driver.find_elements(
-                        By.CSS_SELECTOR, "div.crate.upgrade.enabled"
-                    )
-                    if improvments:
-                        try:
-                            random.choice(improvments).click()
-                        except:
-                            pass
-                time.sleep(0.5)
-        except StaleElementReferenceException:
-            pass
-
-    def run_threads(self):
-        do_upgrades_t = threading.Thread(target=self.do_upgrades)
-        do_upgrades_t.start()
-        big_cookie_clicker_t = threading.Thread(target=self.big_cookie_clicker)
-        big_cookie_clicker_t.start()
-        do_improvments_t = threading.Thread(target=self.do_improvments)
-        do_improvments_t.start()
-
-    def run_auto_click_mouse(self):
-        clicker_t = threading.Thread(target=self.clicker)
-        clicker_t.start()
 
     def create_widgets(self):
         # Cria os frames
@@ -254,10 +193,76 @@ class AutoCookieClicker:
         self._listener.stop()
 
 
+class GameThreads:
+    def __init__(self, game: AutoCookieClicker) -> None:
+        self.game = game
+
+    def clicker(self):
+        while True:
+            if self.game._clicando:
+                self.game.mouse.click(Button.left, 1)
+            time.sleep(0.0001)
+
+    def big_cookie_clicker(self):
+        try:
+            while True:
+                if self.game._clicking_big_cookie and self.game._driver:
+                    big_cookie = self.game._driver.find_element(By.ID, "bigCookie")
+                    big_cookie.click()
+        except StaleElementReferenceException:
+            pass
+
+    def do_upgrades(self):
+        try:
+            while True:
+                if self.game._auto_upgrades and self.game._driver:
+                    products = self.game._driver.find_elements(
+                        By.CSS_SELECTOR, "div.product.unlocked.enabled"
+                    )
+                    if products:
+                        try:
+                            products[-1].click()
+                        except:
+                            pass
+                time.sleep(0.5)
+        except StaleElementReferenceException:
+            pass
+
+    def do_improvments(self):
+        try:
+            while True:
+                if self.game._auto_improvments:
+                    improvments = self.game._driver.find_elements(
+                        By.CSS_SELECTOR, "div.crate.upgrade.enabled"
+                    )
+                    if improvments:
+                        try:
+                            random.choice(improvments).click()
+                        except:
+                            pass
+                time.sleep(0.5)
+        except StaleElementReferenceException:
+            pass
+
+    def run_threads(self):
+        do_upgrades_t = threading.Thread(target=self.do_upgrades)
+        do_upgrades_t.start()
+        big_cookie_clicker_t = threading.Thread(target=self.big_cookie_clicker)
+        big_cookie_clicker_t.start()
+        do_improvments_t = threading.Thread(target=self.do_improvments)
+        do_improvments_t.start()
+
+    def run_auto_click_mouse(self):
+        clicker_t = threading.Thread(target=self.clicker)
+        clicker_t.start()
+
+
 if __name__ == "__main__":
     janela = tk.Tk()
     auto_cookie = AutoCookieClicker(janela)
+    game_threads = GameThreads(auto_cookie)
+    game_threads.run_auto_click_mouse()
+    game_threads.run_threads()
     auto_cookie.create_widgets()
-    auto_cookie.run_auto_click_mouse()
     janela.protocol("WM_DELETE_WINDOW", auto_cookie.on_closing)
     janela.mainloop()
