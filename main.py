@@ -33,6 +33,21 @@ class AutoCookieClicker:
         self._listener.start()
 
     def open_cookie_game_browser(self):
+        """
+        Opens the cookie game browser.
+
+        This function opens the browser and navigates to the cookie game website (https://orteil.dashnet.org/cookieclicker/). It checks if the browser is already open and raises an error if it is. It then opens the browser using the ChromeDriverManager and ChromeOptions. The browser window is maximized and the game website is loaded.
+
+        After opening the browser, the function updates the status of the game on the GUI. If the browser is open, the label text is set to "On" and the foreground color is set to green. Otherwise, the label text is set to "Off" and the foreground color is set to red.
+
+        The function waits for 1.5 seconds and then clicks on the cookie acceptance button and the language selection button on the game website.
+
+        Parameters:
+            self (object): The instance of the class.
+
+        Returns:
+            None
+        """
         if self._driver:
             messagebox.showerror("Erro", "O navegador já está aberto!")
             raise InterruptedError("O navegador já está aberto")
@@ -63,6 +78,15 @@ class AutoCookieClicker:
         langage_button.click()
 
     def toggle_key(self, key):
+        """
+        Toggles the state of a key and updates the corresponding label and color.
+
+        Parameters:
+            key (Key or KeyCode): The key to toggle.
+
+        Returns:
+            None
+        """
         if key == Key.f8:
             self._clicking_big_cookie = not self._clicking_big_cookie
             if self._clicking_big_cookie:
@@ -89,6 +113,14 @@ class AutoCookieClicker:
             print(key, self._clicando)
 
     def toggle_btn_click(self):
+        """
+        Toggles the state of the button click.
+
+        This function is called when the toggle button is clicked. It checks the current state of the
+        self._clicking_big_cookie attribute and toggles its value. If the attribute is True, it changes
+        the text of self.lbl_auto_click to "On" and sets the foreground color to green. If the attribute
+        is False, it changes the text of self.lbl_auto_click to "Off" and sets the foreground color to red.
+        """
         if self._driver:
             self._clicking_big_cookie = not self._clicking_big_cookie
             if self._clicking_big_cookie:
@@ -97,6 +129,19 @@ class AutoCookieClicker:
                 self.lbl_auto_click.configure(text="Off", foreground="red")
 
     def toggle_btn_upgrade(self):
+        """
+        Toggles the upgrade button.
+
+        This function is responsible for toggling the upgrade button in the UI. It checks the current state of the `_auto_upgrades` flag and updates it accordingly. If the flag is `True`, it sets it to `False`, and vice versa.
+
+        The function also updates the text and foreground color of the `lbl_auto_upgrade` label based on the new state of `_auto_upgrades`. If the flag is `True`, the label text is set to "On" and the foreground color is set to "green". If the flag is `False`, the label text is set to "Off" and the foreground color is set to "red".
+
+        Parameters:
+            self (object): The instance of the class.
+
+        Returns:
+            None
+        """
         if self._driver:
             self._auto_upgrades = not self._auto_upgrades
             if self._auto_upgrades:
@@ -105,6 +150,17 @@ class AutoCookieClicker:
                 self.lbl_auto_upgrade.configure(text="Off", foreground="red")
 
     def toggle_btn_improvment(self):
+        """
+        Toggles the button improvement feature.
+
+        This function toggles the state of the button improvement feature. If the feature is currently enabled, it will be disabled, and vice versa. The state of the feature is stored in the `_auto_improvements` variable.
+
+        Parameters:
+            self (_): The instance of the class.
+
+        Returns:
+            None
+        """
         if self._driver:
             self._auto_improvments = not self._auto_improvments
             if self._auto_improvments:
@@ -113,6 +169,9 @@ class AutoCookieClicker:
                 self.lbl_auto_improvments.configure(text="Off", foreground="red")
 
     def create_widgets(self):
+        """
+        Creates and positions frames, labels, and buttons for the UI.
+        """
         # Cria os frames
         self.frm_img_cookie = ttk.Frame(self._raiz, padding=10)
         self.frm_img_cookie.grid(row=0, column=0, rowspan=3, sticky="nsew")
@@ -184,12 +243,22 @@ class AutoCookieClicker:
         self.auto_improvment_btn.grid(row=0, column=0, padx=5, pady=5)
 
     def on_closing(self):
+        """
+        Closes the application by quitting the driver and destroying the root window.
+
+        No parameters.
+
+        No return value.
+        """
         if self._driver:
             self._driver.quit()
         self._raiz.destroy()
         sys.exit()
 
     def __del__(self):
+        """
+        Delete the object and stop the listener.
+        """
         self._listener.stop()
 
 
@@ -198,12 +267,35 @@ class GameThreads:
         self.game = game
 
     def clicker(self):
+        """
+        Clicks the mouse repeatedly while the game is running.
+
+        This function checks if the game is currently in clicking mode and if so, it
+        simulates a left mouse click. It then pauses for a very short amount of time
+        before repeating the process.
+
+        Parameters:
+            self (object): The instance of the class.
+
+        Returns:
+            None
+        """
         while True:
             if self.game._clicando:
                 self.game.mouse.click(Button.left, 1)
             time.sleep(0.0001)
 
     def big_cookie_clicker(self):
+        """
+        Clicks on the big cookie element as long as the game's clicking big cookie flag is set to True
+        and the game's driver is available.
+
+        Parameters:
+            self: The instance of the class.
+
+        Returns:
+            None
+        """
         try:
             while True:
                 if self.game._clicking_big_cookie and self.game._driver:
@@ -213,6 +305,15 @@ class GameThreads:
             pass
 
     def do_upgrades(self):
+        """
+        Runs an upgrade loop that continuously checks for unlocked and enabled products and clicks on the last one.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
         try:
             while True:
                 if self.game._auto_upgrades and self.game._driver:
@@ -229,6 +330,17 @@ class GameThreads:
             pass
 
     def do_improvments(self):
+        """
+        Executes a loop that continuously checks for available improvements in the game and clicks on a random improvement element if found.
+
+        This function is executed by the `do_improvements` method of the `self` object.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
         try:
             while True:
                 if self.game._auto_improvments:
@@ -245,6 +357,14 @@ class GameThreads:
             pass
 
     def run_threads(self):
+        """
+        Runs multiple threads concurrently to perform various tasks.
+        This function creates three threads: `do_upgrades_t`, `big_cookie_clicker_t`, and `do_improvments_t`.
+        Each thread is responsible for executing a specific method in a separate thread.
+        The `do_upgrades_t` thread executes the `do_upgrades` method.
+        The `big_cookie_clicker_t` thread executes the `big_cookie_clicker` method.
+        The `do_improvments_t` thread executes the `do_improvments` method.
+        """
         do_upgrades_t = threading.Thread(target=self.do_upgrades)
         do_upgrades_t.start()
         big_cookie_clicker_t = threading.Thread(target=self.big_cookie_clicker)
@@ -253,6 +373,17 @@ class GameThreads:
         do_improvments_t.start()
 
     def run_auto_click_mouse(self):
+        """
+        Run the auto click mouse function.
+
+        This function creates a new thread to execute the `clicker` method.
+
+        Parameters:
+            self (object): The current instance of the class.
+
+        Returns:
+            None
+        """
         clicker_t = threading.Thread(target=self.clicker)
         clicker_t.start()
 
